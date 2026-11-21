@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <iomanip>
+#include <sstream>
 #include <list>
 #include <iterator>
 using namespace std;
@@ -82,7 +83,105 @@ class Memoria{
             }
             Iter it = elegirHueco(t);
 
-            if(it->tamanio < t || !it->esHueco()) return false; el 
+
+            if(it==bloques.end()) return false; //el programa retorna false porque regreso el ultimo espacio, que simplemente no tiene el tamanio suficiente o ni siquiera es un hueco
+
+            int tamHueco = it->tamanio;
+            int sobrante = it->tamanio-t;
+
+            it->ID = id;
+            it->cuanto = quantum;
+
+            if(sobrante>=min){
+                it->tamanio = t;
+                bloques.insert(next(it), Bloque{0, sobrante, 0});
+            }
+
+            return true;
+
         }
 
+        void condensar(){
+            Iter it = bloques.begin();
+
+            while(it != bloques.end()){
+                Iter sig = next(it);
+                if(sig!=bloques.end() && it->esHueco() && sig->esHueco()){
+                    it->tamanio += sig->tamanio;
+                    bloques.erase(sig);
+                }else{
+                    ++it;
+                }
+            }
+        }
+
+        bool actualizarcuanto(int id, int cuantoSistema){
+            Iter it = buscarProceso(id);
+            if(it == bloques.end()){ return false; }
+            it->cuanto -= cuantoSistema;
+            return true;
+        }
+
+        string aTexto() const{
+            ostringstream ss;
+
+            for(const Bloque& b : bloques){
+                ss << "[" << b.ID << ", " << b.tamanio << ", " <<  b.cuanto << "]";
+            }
+            return ss.str();
+        }
+
+        void imprimir(){
+            cout << aTexto() << endl;
+        }
+
+        int tamTotal(){
+            return tam;
+        }
+
+        int ocupacionKB() const {
+            int suma = 0;
+            for (const Bloque& b : bloques) {
+                if (b.ID != 0) suma += b.tamanio;
+            }
+            return suma;
+        }
+
+        double ocupacionPorcentaje(){
+            return 100*ocupacionKB()/tamTotal();
+        }
+
+        int espacioLibre() const {
+            return tam-ocupacionKB();
+        }
+
+        int huecoMayor() const{
+            int mayor = 0;
+            for (const Bloque& b : bloques) {
+                if (b.ID == 0 && b.tamanio>mayor) mayor = b.tamanio;
+            }
+            return mayor;
+        }
+
+        int huecoMenor() const {
+            int menor = 0;
+            for (const Bloque& b : bloques) {
+                if (b.ID == 0 && b.tamanio < menor) menor = b.tamanio;
+            }
+            return menor;
+        }
+
+        int cantidadHuecos() const{
+            int n = 0;
+            for (const Bloque& b : bloques) {
+                if (b.ID == 0) n++;
+            }
+            return n;
+        }
+
+        void liberarID(int id){
+            Iter it = buscarProceso(id);
+            it->ID=0;
+            it->cuanto=0;
+        }
 };
