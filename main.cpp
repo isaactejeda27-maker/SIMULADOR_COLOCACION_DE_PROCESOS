@@ -14,19 +14,12 @@
         double ocupacionMedia() const { return ciclos ? sumaOcupacion / ciclos : 0; }
     };
 
-    void mostrarEstado
-    (
-        ostream& out,
-        const Memoria& mem,
-        const PlanificadorRR& rr,
-        const PCB* ejecutando = nullptr)
+    void mostrarEstado (ostream& out, const Memoria& mem, const PlanificadorRR& rr, const PCB* ejecutando = nullptr)
     {
         out << "\n-----------------------------\n";
 
         if(ejecutando)
-            out << "Proceso en ejecucion: "
-                << ejecutando->aTexto()
-                << "\n";
+            out << "Proceso en ejecucion: " << ejecutando->aTexto() << "\n";
         else
             out << "Proceso en ejecucion: Ninguno\n";
 
@@ -45,8 +38,7 @@
         out << "--------------------------------\n";
     }
 
-    bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, bool hayNuevo,
-            const string& nombre, ostream& out, Estadisticas& est)
+    bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, bool hayNuevo, const string& nombre, ostream& out, Estadisticas& est)
     {
         out << "\n--- " << nombre << " ---\n";
         mostrarEstado(out, mem, rr, nullptr);
@@ -124,8 +116,7 @@
         return m == Metodo::MEJOR_AJUSTE ? "Mejor ajuste" : "Peor ajuste";
     }
 
-    Estadisticas simular(Metodo metodo, int memKB, int quantum, int tamMax, int cuantoMax,
-                        unsigned semilla, int msPausa, ostream& out)
+    Estadisticas simular(Metodo metodo, int memKB, int quantum, int tamMax, int cuantoMax, unsigned semilla, int msPausa, ostream& out)
     {
         Memoria mem(memKB, metodo, 32);
         PlanificadorRR rr(quantum);
@@ -141,9 +132,7 @@
         {
             PCB listo = gen.verListo();
 
-            bool entro = ciclo(mem, rr, listo, true,
-                            "CICLO " + to_string(i),
-                            out, est);
+            bool entro = ciclo(mem, rr, listo, true, "CICLO " + to_string(i), out, est);
 
             if (entro)
                 gen.tomarListo();
@@ -152,15 +141,6 @@
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(msPausa));
             }
-
-            cout << "\nENTER = continuar | 0 = terminar: ";
-
-            string opcion;
-            getline(cin, opcion);
-
-            if(opcion == "0")
-                break;
-
             i++;
         }
         return est; 
