@@ -254,15 +254,8 @@ int main()
         semilla,
         ms,
         cout);
-
-    cout << "\n Resumen \n"
-        << "Admitidos: " << e.admitidos
-        << " Terminados: " << e.terminados
-        << " Ciclos en espera: " << e.ciclosEspera
-        << "\nOcupacion media: "
-        << fixed << setprecision(2)
-        << e.ocupacionMedia()
-        << "%\n";
+return 0;
+)
 
     return 0;
 }
