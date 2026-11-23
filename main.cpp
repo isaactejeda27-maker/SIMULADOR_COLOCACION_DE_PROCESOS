@@ -87,7 +87,7 @@
 
             if (t.termino)
             {
-                out << "Descargando proceso " << t.despues.aTexto() << "\n";
+                out << "Eliminando proceso " << t.despues.aTexto() << "\n";
                 mem.liberar(t.despues.id);
                 out << mem.aTexto() << "\n";
 
