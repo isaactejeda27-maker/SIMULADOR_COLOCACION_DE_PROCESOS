@@ -136,9 +136,17 @@ Estadisticas simular(Metodo metodo, int memKB, int quantum, int tamMax, int cuan
             if(t=='-'){
                 if(msPausa>1000){
                     msPausa = msPausa-1000;
+                }else if(msPausa>100){
+                    msPausa -= 100;
+                }else{
+                    msPausa=100;
                 }
             }else if(t=='+'){
-                msPausa = msPausa+1000;
+                if(msPausa<1000){
+                    msPausa = msPausa+100;
+                }else{
+                    msPausa = msPausa+1000;
+                }
             }else if(t=='e' || t == 'E'){
                 break;
             }
@@ -171,9 +179,7 @@ int leerInt(const string& pregunta, int porDefecto)
 
 int main()
 {
-    cout << " Simulador\n"
-        << "1. Mejor ajuste\n"
-        << "2. Peor ajuste\n";
+    cout << " Simulador\n" << "1. Mejor ajuste\n" << "2. Peor ajuste\n";
     int modo = leerInt("Opcion", 1);
 
     Metodo m;
@@ -254,5 +260,6 @@ int main()
         semilla,
         ms,
         cout);
-return 0;
-)
+
+    return 0;
+}
