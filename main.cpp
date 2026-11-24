@@ -37,38 +37,33 @@ void mostrarEstado (ostream& out, const Memoria& mem, const PlanificadorRR& rr, 
 
 }
 
-bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, bool hayNuevo, const string& nombre, ostream& out, Estadisticas& est)
+bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, ostream& out, Estadisticas& est)
 {
-    out << "\n" << nombre << "\n";
-    mostrarEstado(out, mem, rr, nullptr);
-    bool entro = false;
+    out << "\nCICLO " << est.ciclos + 1 << "\n";
 
-    if (hayNuevo)
+    bool entro = mem.asignar(nuevo.id, nuevo.tamanio, nuevo.cuanto);
+    if (!entro)
     {
+        int antes = mem.cantidadHuecos();
+        mem.condensar();
+        if (mem.cantidadHuecos() < antes)
+        {
+            out << "Condensando huecos\n" << mem.aTexto() << "\n";
+        }
         entro = mem.asignar(nuevo.id, nuevo.tamanio, nuevo.cuanto);
-        if (!entro)
-        {
-            int antes = mem.cantidadHuecos();
-            mem.condensar();
-            if (mem.cantidadHuecos() < antes)
-            {
-                out << "Condensando huecos\n" << mem.aTexto() << "\n";
-            }
-            entro = mem.asignar(nuevo.id, nuevo.tamanio, nuevo.cuanto);
-        }
+    }
 
-        if (entro)
-        {
-            out << "Entra Proceso " << nuevo.aTexto() << "\n";
-            rr.agregar(nuevo);
-            out << mem.aTexto() << "\n";
-            est.admitidos++;
-        }
-        else
-        {
-            out << "Sin espacio para " << nuevo.aTexto() << ", espera\n";
-            est.ciclosEspera++;
-        }
+    if (entro)
+    {
+        out << "Entra Proceso " << nuevo.aTexto() << "\n";
+        rr.agregar(nuevo);
+        out << mem.aTexto() << "\n";
+        est.admitidos++;
+    }
+    else
+    {
+        out << "Sin espacio para " << nuevo.aTexto() << ", espera\n";
+        est.ciclosEspera++;
     }
 
     if (rr.vacia())
@@ -79,8 +74,8 @@ bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, bool hayNuevo, co
     {
         Turno t = rr.atender();
         out << "Atendiendo proceso " << t.antes.aTexto() << "\n";
-        mem.actualizarcuanto(t.antes.id, t.consumido);  
-        mostrarEstado(out, mem, rr, &t.despues);
+        mem.actualizarcuanto(t.antes.id, t.consumido);
+
         string lista = rr.listaTexto();
         out << "Lista RR " << (lista.empty() ? "(vacia)" : lista) << "\n";
 
@@ -100,7 +95,7 @@ bool ciclo(Memoria& mem, PlanificadorRR& rr, const PCB& nuevo, bool hayNuevo, co
         }
         else
         {
-            out << mem.aTexto() << "\n"; 
+            out << mem.aTexto() << "\n";
         }
     }
 
@@ -121,9 +116,6 @@ Estadisticas simular(Metodo metodo, int memKB, int quantum, int tamMax, int cuan
     PlanificadorRR rr(quantum);
     GeneradorProcesos gen(tamMax, cuantoMax, 32, semilla);
     Estadisticas est;
-
-    out << "Estado inicial\n";
-    mostrarEstado(out, mem, rr, nullptr);
 
     int i = 1;
 
@@ -154,7 +146,7 @@ Estadisticas simular(Metodo metodo, int memKB, int quantum, int tamMax, int cuan
 
         PCB listo = gen.verListo();
 
-        bool entro = ciclo(mem, rr, listo, true, "CICLO " + to_string(i), out, est);
+        bool entro = ciclo(mem, rr, listo, out, est);
 
         if (entro)
             gen.tomarListo();
